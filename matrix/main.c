@@ -1,46 +1,58 @@
 #include <stdio.h>
 #include "matrix_op.h"
 
-void print_m(const char* label, Matrix3x3 M) {
-    printf("--- %s ---\n", label);
-    for(int i=0; i<SIZE; i++) {
-        for(int j=0; j<SIZE; j++) printf("%.2f\t", M.data[i][j]);
+void print_mat(const char *title, int M[3][3]) {
+    int i, j;
+    printf("%s\n", title);
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++)
+            printf("%5d ", M[i][j]);
         printf("\n");
     }
     printf("\n");
 }
 
 int main() {
-    Matrix3x3 A = {{{1, 2, 3}, {0, 1, 4}, {5, 6, 0}}};
-    Matrix3x3 B = {{{2, 0, 1}, {3, 0, 0}, {1, 2, 1}}};
-    Matrix3x3 res;
+    int A[3][3] = {
+        {1, 2, 3},
+        {0, 1, 4},
+        {5, 6, 0}
+    };
 
-    add_matrices(A, B, &res);
-    print_m("1. Addition (A + B)", res);
+    int B[3][3] = {
+        {7, 8, 9},
+        {1, 2, 3},
+        {4, 5, 6}
+    };
 
-    sub_matrices(A, B, &res);
-    print_m("2. Subtraction (A - B)", res);
+    int R[3][3];
+    int adj[3][3];
 
-    elementwise_multiply(A, B, &res);
-    print_m("3. Element-wise Multiply (A o B)", res);
+    print_mat("Matrix A:", A);
+    print_mat("Matrix B:", B);
 
-    multiply_matrices(A, B, &res);
-    print_m("4. Matrix Multiplication (AB)", res);
+    mat_add(A, B, R);
+    print_mat("A + B:", R);
 
-    transpose(A, &res);
-    print_m("5. Transpose of A", res);
+    mat_sub(A, B, R);
+    print_mat("A - B:", R);
 
-    float det = determinant(A);
-    printf("6. Determinant of A: %.2f\n\n", det)
+    mat_elem_mul(A, B, R);
+    print_mat("A o B:", R);
 
-    adjoint(A, &res);
-    print_m("7. Adjoint Matrix of A", res);
+    mat_mul(A, B, R);
+    print_mat("A * B:", R);
 
-    if (inverse(A, &res)) {
-        print_m("8. Inverse Matrix of A", res);
-    } else {
-        printf("8. Inverse: 無法計算 (行列式為 0)\n");
-    }
+    mat_transpose(A, R);
+    print_mat("A^T:", R);
+
+    int detA = mat_det(A);
+    printf("det(A) = %d\n\n", detA);
+
+    mat_inverse(A, adj);
+    print_mat("adj(A):", adj);
+
+    printf("A^{-1} = adj(A) / %d\n", detA);
 
     return 0;
 }

@@ -3,19 +3,19 @@
 
 #define SIZE 3
 
-typedef struct {
-    float data[SIZE][SIZE];
-} Matrix3x3;
+/* Basic operations */
+void mat_add(int A[SIZE][SIZE], int B[SIZE][SIZE], int R[SIZE][SIZE]);
+void mat_sub(int A[SIZE][SIZE], int B[SIZE][SIZE], int R[SIZE][SIZE]);
+void mat_elem_mul(int A[SIZE][SIZE], int B[SIZE][SIZE], int R[SIZE][SIZE]);
 
-void add_matrices(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res);
-void sub_matrices(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res);
-void elementwise_multiply(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res);
+/* Linear operations */
+void mat_mul(int A[SIZE][SIZE], int B[SIZE][SIZE], int R[SIZE][SIZE]);
+void mat_transpose(int A[SIZE][SIZE], int R[SIZE][SIZE]);
 
-void multiply_matrices(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res);
-void transpose(Matrix3x3 A, Matrix3x3 *res);
+/* Advanced */
+int mat_det(int A[SIZE][SIZE]);
 
-float determinant(Matrix3x3 A);
-void adjoint(Matrix3x3 A, Matrix3x3 *res);
-int inverse(Matrix3x3 A, Matrix3x3 *res);
+/* Inverse: compute adj(A), return det(A) */
+int mat_inverse(int A[SIZE][SIZE], int adj[SIZE][SIZE]);
 
 #endif

@@ -1,78 +1,81 @@
 #include "matrix_op.h"
-#include <stdio.h>
 
-void add_matrices(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res) {
-    for(int i=0; i<SIZE; i++)
-        for(int j=0; j<SIZE; j++)
-            res->data[i][j] = A.data[i][j] + B.data[i][j];
+/* ===== Basic ===== */
+
+void mat_add(int A[3][3], int B[3][3], int R[3][3]) {
+    int i, j;
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 3; j++)
+            R[i][j] = A[i][j] + B[i][j];
 }
 
-void sub_matrices(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res) {
-    for(int i = 0; i < SIZE; i++) {
-        for(int j = 0; j < SIZE; j++) {
-            res->data[i][j] = A.data[i][j] - B.data[i][j];
+void mat_sub(int A[3][3], int B[3][3], int R[3][3]) {
+    int i, j;
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 3; j++)
+            R[i][j] = A[i][j] - B[i][j];
+}
+
+void mat_elem_mul(int A[3][3], int B[3][3], int R[3][3]) {
+    int i, j;
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 3; j++)
+            R[i][j] = A[i][j] * B[i][j];
+}
+
+/* ===== Linear ===== */
+
+void mat_mul(int A[3][3], int B[3][3], int R[3][3]) {
+    int i, j, k;
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            R[i][j] = 0;
+            for (k = 0; k < 3; k++)
+                R[i][j] += A[i][k] * B[k][j];
         }
     }
 }
 
-void elementwise_multiply(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res) {
-    for(int i = 0; i < SIZE; i++) {
-        for(int j = 0; j < SIZE; j++) {
-            res->data[i][j] = A.data[i][j] * B.data[i][j];
-        }
-    }
+void mat_transpose(int A[3][3], int R[3][3]) {
+    int i, j;
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 3; j++)
+            R[j][i] = A[i][j];
 }
 
-void multiply_matrices(Matrix3x3 A, Matrix3x3 B, Matrix3x3 *res) {
-    for(int i=0; i<SIZE; i++) {
-        for(int j=0; j<SIZE; j++) {
-            res->data[i][j] = 0;
-            for(int k=0; k<SIZE; k++)
-                res->data[i][j] += A.data[i][k] * B.data[k][j];
-        }
-    }
+/* ===== Determinant ===== */
+
+int mat_det(int A[3][3]) {
+    int a = A[0][0], b = A[0][1], c = A[0][2];
+    int d = A[1][0], e = A[1][1], f = A[1][2];
+    int g = A[2][0], h = A[2][1], i = A[2][2];
+
+    return a*(e*i - f*h)
+         - b*(d*i - f*g)
+         + c*(d*h - e*g);
 }
 
-void transpose(Matrix3x3 A, Matrix3x3 *res) {
-    for(int i=0; i<SIZE; i++)
-        for(int j=0; j<SIZE; j++)
-            res->data[j][i] = A.data[i][j];
+/* ===== Inverse (Adjoint) ===== */
+
+static int det2(int a, int b, int c, int d) {
+    return a*d - b*c;
 }
 
-float determinant(Matrix3x3 A) {
-    float a = A.data[0][0], b = A.data[0][1], c = A.data[0][2];
-    float d = A.data[1][0], e = A.data[1][1], f = A.data[1][2];
-    float g = A.data[2][0], h = A.data[2][1], i = A.data[2][2];
-    return a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
-}
+int mat_inverse(int A[3][3], int adj[3][3]) {
+    int detA = mat_det(A);
 
-void adjoint(Matrix3x3 A, Matrix3x3 *res) {
-    Matrix3x3 cofactor;
-    float (*m)[SIZE] = A.data;
-    
-    cofactor.data[0][0] =  (m[1][1]*m[2][2] - m[1][2]*m[2][1]);
-    cofactor.data[0][1] = -(m[1][0]*m[2][2] - m[1][2]*m[2][0]);
-    cofactor.data[0][2] =  (m[1][0]*m[2][1] - m[1][1]*m[2][0]);
-    
-    cofactor.data[1][0] = -(m[0][1]*m[2][2] - m[0][2]*m[2][1]);
-    cofactor.data[1][1] =  (m[0][0]*m[2][2] - m[0][2]*m[2][0]);
-    cofactor.data[1][2] = -(m[0][0]*m[2][1] - m[0][1]*m[2][0]);
-    
-    cofactor.data[2][0] =  (m[0][1]*m[1][2] - m[0][2]*m[1][1]);
-    cofactor.data[2][1] = -(m[0][0]*m[1][2] - m[0][2]*m[1][0]);
-    cofactor.data[2][2] =  (m[0][0]*m[1][1] - m[0][1]*m[1][0]);
-    
-    transpose(cofactor, res);
-}
+    /* adj(A) = cofactor(A)^T */
+    adj[0][0] =  det2(A[1][1], A[1][2], A[2][1], A[2][2]);
+    adj[1][0] = -det2(A[1][0], A[1][2], A[2][0], A[2][2]);
+    adj[2][0] =  det2(A[1][0], A[1][1], A[2][0], A[2][1]);
 
-int inverse(Matrix3x3 A, Matrix3x3 *res) {
-    float det = determinant(A);
-    if (det == 0) return 0;
-    
-    Matrix3x3 adj;
-    adjoint(A, &adj);
-    for(int i=0; i<SIZE; i++)
-        for(int j=0; j<SIZE; j++)
-            res->data[i][j] = adj.data[i][j] / det;
-    return 1;
+    adj[0][1] = -det2(A[0][1], A[0][2], A[2][1], A[2][2]);
+    adj[1][1] =  det2(A[0][0], A[0][2], A[2][0], A[2][2]);
+    adj[2][1] = -det2(A[0][0], A[0][1], A[2][0], A[2][1]);
+
+    adj[0][2] =  det2(A[0][1], A[0][2], A[1][1], A[1][2]);
+    adj[1][2] = -det2(A[0][0], A[0][2], A[1][0], A[1][2]);
+    adj[2][2] =  det2(A[0][0], A[0][1], A[1][0], A[1][1]);
+
+    return detA;  /* A^{-1} = adj(A) / det(A) */
 }
